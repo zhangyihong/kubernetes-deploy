@@ -17,3 +17,5 @@ RUN curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-releas
 ENV PATH=/opt/kubernetes-deploy:$PATH
 COPY / /opt/kubernetes-deploy/
 
+ENTRYPOINT []
+CMD []
