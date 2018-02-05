@@ -20,7 +20,7 @@ fi
 
 echo "Deploying $CI_ENVIRONMENT_SLUG (release name: $releases_name) with $CI_REGISTRY_IMAGE:$CI_REGISTRY_TAG..."
 Generate-yaml
-kubectl apply -f etc/ -n $KUBE_NAMESPACE
+kubectl apply -f k8s/ -n $KUBE_NAMESPACE
 
 echo ""
 
