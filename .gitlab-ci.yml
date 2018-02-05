@@ -1,0 +1,32 @@
+image: docker:git
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - release
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+
+variables:
+  DOCKER_DRIVER: overlay #提高 docker 建造性能
+  IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+snapshots:
+  stage: build
+  script:
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
+  only:
+    - develop
+    - cancel-helm
+
+releases:
+  stage: release
+  script:
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
+  only:
+    - tags
