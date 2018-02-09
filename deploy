@@ -32,6 +32,7 @@ deploy_sigle_game() {
     helm upgrade --install \
     --wait \
     --namespace="$KUBE_NAMESPACE" \
+    --version="$CI_PIPELINE_ID-$CI_BUILD_ID" \
     --tiller-namespace="default" \
     -f $value_file $releases_name \
     .
