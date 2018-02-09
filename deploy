@@ -12,15 +12,52 @@ source "$DEPLOY_ROOT_DIR/src/common.bash"
 
 ensure_deploy_variables
 create_kubeconfig
+install_tiller
 
-if [[ ! -f templates/config.tpl ]]; then
-  echo "No template file found in ./templates/config.tpl ..."
+
+PORJECT_PATH=`pwd`
+SUB_PROJECT_PATH="k8s"
+THE_DEPLOY_NAME=$1
+
+if [[ "${THE_DEPLOY_NAME}" == "" ]]; then
+  echo -e "please input args ! \nuseage: deploy Project_name|ALL"
   exit 1
 fi
 
-echo "Deploying $CI_ENVIRONMENT_SLUG (release name: $releases_name) with $CI_REGISTRY_IMAGE:$CI_REGISTRY_TAG..."
-Generate-yaml
-kubectl apply -f k8s/ -n $KUBE_NAMESPACE
 
-echo ""
+deploy_sigle_game() {
+
+    value_file=$1
+    releases_name=$2
+    helm upgrade --install \
+    --wait \
+    --namespace="$KUBE_NAMESPACE" \
+    --tiller-namespace="default" \
+    -f $value_file $releases_name \
+    .
+}
+
+deploy_multiple_game() {
+  sub_project=$1
+  cd ${PORJECT_PATH}/${sub_project}/chart
+  for value_file in `ls -f *values.yaml`; do
+
+    releases_name=$(echo -n $value_file |awk -F"-" '{print $1}')
+    echo $project_name,$value_file,$releases_name
+    
+    deploy_sigle_game ${value_file} ${releases_name}
+
+  done
+}
+
+for sub_project in `ls -d ${SUB_PROJECT_PATH}/*`; do
+
+  project_name=$(basename ${sub_project})
+  if [[ "${THE_DEPLOY_NAME}" != "ALL" && "${THE_DEPLOY_NAME}" != "${project_name}"  ]]; then
+     continue
+  fi
+
+  deploy_multiple_game ${sub_project}
+
+done 
 

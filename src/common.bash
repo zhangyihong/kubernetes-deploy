@@ -2,6 +2,8 @@ set -eo pipefail
 
 [[ "$TRACE" ]] && set -x
 
+export TILLER_NAMESPACE="$KUBE_NAMESPACE"
+
 create_kubeconfig() {
   [[ -z "$KUBE_URL" ]] && return
 
@@ -52,4 +54,16 @@ metadata:
 EOF
 }
 
-
+install_tiller() {
+  echo "Checking Tiller..."
+  if ! helm version &>/dev/null; then
+    echo "Configuring Tiller..."
+    helm init
+    kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
+    if ! helm version --debug; then
+      echo "Failed to init Tiller."
+      return 1
+    fi
+  fi
+  echo ""
+}
