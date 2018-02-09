@@ -40,7 +40,7 @@ deploy_sigle_game() {
 deploy_multiple_game() {
   sub_project=$1
   cd ${PORJECT_PATH}/${sub_project}/chart
-  for value_file in `ls -f *values.yaml`; do
+  for value_file in `ls *values.yaml`; do
 
     releases_name=$(echo -n $value_file |awk -F"-" '{print $1}')
     echo $project_name,$value_file,$releases_name
